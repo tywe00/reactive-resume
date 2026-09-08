@@ -18,13 +18,13 @@ ENV TURBO_TELEMETRY_DISABLED=1
 
 FROM base AS pruner
 COPY . .
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store,sharing=locked \
-    pnpm dlx turbo@${TURBO_VERSION} prune web server --docker
+RUN --mount=type=cache,id=s/432ea4c4-6787-49ec-a38a-d14a5a0b5c24-/pnpm/store,target=/pnpm/store,sharing=locked \
+    pnpm dlx turbo@2.9.12 prune web server --docker
 
 FROM base AS builder
 COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store,sharing=locked \
+RUN --mount=type=cache,id=s/432ea4c4-6787-49ec-a38a-d14a5a0b5c24-/pnpm/store,target=/pnpm/store,sharing=locked \
     pnpm install --frozen-lockfile
 
 COPY --from=pruner /app/out/full/ ./
@@ -44,13 +44,18 @@ RUN node tooling/docker/precompress.mjs apps/web/dist
 
 FROM base AS runtime-pruner
 COPY . .
+<<<<<<< HEAD
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store,sharing=locked \
     pnpm dlx turbo@${TURBO_VERSION} prune server --docker
+=======
+RUN --mount=type=cache,id=s/432ea4c4-6787-49ec-a38a-d14a5a0b5c24-/pnpm/store,target=/pnpm/store,sharing=locked \
+    pnpm dlx turbo@2.9.12 prune server --docker
+>>>>>>> 4350d2594 (fix: namespace pnpm cache mount IDs in Dockerfile)
 
 FROM base AS runtime-deps
 COPY --from=runtime-pruner /app/out/json/ ./
 COPY --from=runtime-pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store,sharing=locked \
+RUN --mount=type=cache,id=s/432ea4c4-6787-49ec-a38a-d14a5a0b5c24-/pnpm/store,target=/pnpm/store,sharing=locked \
     pnpm install --prod --frozen-lockfile
 
 FROM node:${NODE_VERSION}-slim AS runtime
